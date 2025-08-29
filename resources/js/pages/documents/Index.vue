@@ -16,6 +16,7 @@ import Dialog from 'primevue/dialog';
 import axios  from 'axios'
 import  FileUpload from 'primevue/fileupload';
 import {Link} from '@inertiajs/vue3';
+import { router } from '@inertiajs/vue3'
 
 defineProps<{
   documents: any,
@@ -49,9 +50,14 @@ const upload = () => {
             'Content-Type': 'multipart/form-data'
         }
     })
-    .then(res => console.log(res.data) )
+    .then(() => {
+        // refresh documents list from server
+        router.reload({ only: ['documents'] })
+        visible.value = false
+    })
     .catch(err => console.error(err));
     visible.value = false
+
 };
 
 
@@ -124,12 +130,15 @@ const redirect = (id) => {
             v-model:visible="visible"
             modal
             header="Upload"
+            :style="{ width: '25rem' }"
         >
             <span class="text-surface-500 dark:text-surface-400 block mb-8">Upload document</span>
             <div class="flex items-center gap-4 mb-4">
                 <FileUpload
                     ref="fileupload"
                     name="document"
+                    :showUploadButton="false"
+                    :showCancelButton="false"
                     :auto="false"         
                     :maxFileSize="1000000"
                 />
