@@ -69,4 +69,46 @@ class PdfOcrService
 
         return $allTables;
     }
+
+    /**
+     * Format raw Camelot tables into structured arrays
+     *
+     * @param array $rawTables Camelot output decoded as PHP array
+     * @return array
+     */
+    public function formatTables(array $rawTables): array
+    {
+        $formatted = [];
+
+        foreach ($rawTables as $index => $table) {
+            // Flatten nested arrays Camelot sometimes gives
+            $flatRows = [];
+            foreach ($table as $row) {
+                // If row is nested array, flatten
+                if (is_array($row)) {
+                    $flatRow = [];
+                    foreach ($row as $cell) {
+                        // Remove empty strings, trim spaces
+                        $flatRow[] = trim($cell);
+                    }
+                    $flatRows[] = $flatRow;
+                } else {
+                    // fallback
+                    $flatRows[] = [trim($row)];
+                }
+            }
+
+            // Assume first row is header
+            $headers = $flatRows[0] ?? [];
+            $rows = array_slice($flatRows, 1);
+
+            $formatted['table_' . ($index + 1)] = [
+                'headers' => $headers,
+                'rows' => $rows,
+            ];
+        }
+
+        return $formatted;
+    }
+
 }

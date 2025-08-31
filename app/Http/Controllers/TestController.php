@@ -1,0 +1,202 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Carbon\Carbon;
+use Inertia\Inertia;
+use App\Models\Document;
+use Illuminate\Http\Request;
+use App\Services\PdfOcrService;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
+use thiagoalessio\TesseractOCR\TesseractOCR;
+
+
+class TestController
+{
+    public function test()
+    {
+        $file = Storage::disk('local')->get('response.json');
+
+        $textractJson = json_decode($file, true);
+
+        $parsedTables = $this->parseTextractTables($textractJson);
+
+        foreach($parsedTables as $key => $table) {
+            // if(!$key) continue;
+            dd($table);
+
+        }
+        echo "<pre>";
+        var_dump($parsedTables);
+        exit();
+        $filePath = 'reports/test_ocr.pdf';
+
+        // Get file contents from S3
+        $fileContents = Storage::disk('s3')->get($filePath);
+
+        // Create a temporary stream
+        $temp = tmpfile();
+        fwrite($temp, $fileContents);
+        fseek($temp, 0);
+
+        // Send it via HTTP POST
+        $response = Http::attach(
+            'file',
+            $temp,                  // pass the stream
+            basename($filePath)
+        )->post('http://127.0.0.1:8001/extract-tables/');
+
+        // Close temp
+        fclose($temp);
+
+        $tables = $response->json();
+
+        return $this->formatTables($tables['tables']);
+    }
+
+    public function formatTables(array $rawTables): array
+        {
+            $formatted = [];
+
+            foreach ($rawTables as $index => $table) {
+                // Flatten nested arrays Camelot sometimes gives
+                $flatRows = [];
+                foreach ($table as $row) {
+                    // If row is nested array, flatten
+                    if (is_array($row)) {
+                        $flatRow = [];
+                        foreach ($row as $cell) {
+                            // Remove empty strings, trim spaces
+                            $flatRow[] = trim($cell);
+                        }
+                        $flatRows[] = $flatRow;
+                    } else {
+                        // fallback
+                        $flatRows[] = [trim($row)];
+                    }
+                }
+
+                // Assume first row is header
+                $headers = $flatRows[0] ?? [];
+                $rows = array_slice($flatRows, 1);
+
+                $formatted['table_' . ($index + 1)] = [
+                    'headers' => $headers,
+                    'rows' => $rows,
+                ];
+            }
+
+            return $formatted;
+        }
+
+
+    /**
+     * Parses AWS Textract response and returns structured tables.
+     *
+     * @param array $textractResponse AWS Textract JSON decoded as an array
+     * @return array
+     */
+    public function parseTextractTables(array $textractResponse): array
+    {
+        $blocks = $textractResponse['Blocks'] ?? [];
+
+        // Collect blocks by type and by Id
+        $blockMap = [];
+        foreach ($blocks as $block) {
+            $blockMap[$block['Id']] = $block;
+        }
+
+        // Find TABLE blocks
+        $tables = [];
+        foreach ($blocks as $block) {
+            if ($block['BlockType'] === 'TABLE') {
+
+                $tables[] = $this->parseSingleTable($block, $blockMap);
+            }
+        }
+
+        return [
+            'tables' => $tables
+        ];
+    }
+
+    /**
+     * Parses a single table block into headers and rows.
+     *
+     * @param array $tableBlock
+     * @param array $blockMap
+     * @return array
+     */
+    public function parseSingleTable(array $tableBlock, array $blockMap): array
+    {
+        $rows = [];
+        $headers = [];
+        $cells = [];
+
+        // Get all CELL blocks related to this table
+        foreach ($tableBlock['Relationships'] ?? [] as $relationship) {
+            if ($relationship['Type'] === 'CHILD') {
+                foreach ($relationship['Ids'] as $childId) {
+                    $child = $blockMap[$childId] ?? null;
+                    if ($child && $child['BlockType'] === 'CELL') {
+                        $rowIndex = $child['RowIndex'] - 1; // Textract is 1-indexed
+                        $colIndex = $child['ColumnIndex'] - 1;
+
+                        $text = $this->getTextFromBlock($child, $blockMap);
+
+                        $cells[$rowIndex][$colIndex] = $text;
+                    }
+                }
+            }
+        }
+
+        // Assume first row is header
+        if (!empty($cells)) {
+            ksort($cells);
+            $firstRow = array_shift($cells);
+            ksort($firstRow);
+            $headers = array_values($firstRow);
+
+            // Remaining rows
+            $rows = [];
+            foreach ($cells as $row) {
+                ksort($row);
+                $rows[] = array_values($row);
+            }
+        }
+
+        return [
+            'headers' => $headers,
+            'rows' => $rows
+        ];
+    }
+
+    /**
+     * Recursively get text from a block and its CHILD relationships.
+     *
+     * @param array $block
+     * @param array $blockMap
+     * @return string
+     */
+    public function getTextFromBlock(array $block, array $blockMap): string
+    {
+        if (isset($block['Text'])) {
+            return $block['Text'];
+        }
+
+        $text = '';
+        foreach ($block['Relationships'] ?? [] as $relationship) {
+            if ($relationship['Type'] === 'CHILD') {
+                foreach ($relationship['Ids'] as $childId) {
+                    $child = $blockMap[$childId] ?? null;
+                    if ($child) {
+                        $text .= $this->getTextFromBlock($child, $blockMap) . ' ';
+                    }
+                }
+            }
+        }
+
+        return trim($text);
+    }
+}

@@ -2,14 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Document;
+use Carbon\Carbon;
 use Inertia\Inertia;
+use App\Models\Document;
 use Illuminate\Http\Request;
 use App\Services\PdfOcrService;
 use Illuminate\Support\Facades\Storage;
 use thiagoalessio\TesseractOCR\TesseractOCR;
 
- class DocumentController
+
+class DocumentController
 {
     public function index()
     {
@@ -33,29 +35,19 @@ use thiagoalessio\TesseractOCR\TesseractOCR;
             return response()->json(['message' => 'No file uploaded'], 400);
         }
 
-       // Generate a custom name
-        $customName = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-
         // Store the file with the custom name in 'uploads' folder
-        $path = $file->storeAs('uploads', $customName);
+        $customName = 'Report ' . now()->format('Y-m-d') . time(). '.' . $file->getClientOriginalExtension();
+        Storage::disk('s3')->put('reports/' .$customName, $file->getContent());
 
-        // Example: get file info
-        $fileInfo = [
-            'original_name' => $file->getClientOriginalName(),
-            'size' => $file->getSize(),
-            'mime' => $file->getClientMimeType(),
-        ];
-        
+        // Create DB record
         Document::create([
             'user_id' => auth()->user()->id,
-            'file_name' => $customName  
+            'file_name' => $customName
         ]);
-        // Optional: save file
-        // $file->store('uploads');
 
         return response()->json([
             'message' => 'Upload successful',
-            'file' => $fileInfo,
+            'file' => $customName,
         ]);
     }
 

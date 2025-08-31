@@ -1,8 +1,14 @@
 <?php
 
 use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\TestController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+
+
+
+Route::get('/test', [TestController::class, 'test'])
+    ->name('test');
 
 Route::get('/', function () {
     return redirect('/documents');
@@ -11,7 +17,7 @@ Route::get('/', function () {
 // documents
 Route::get('documents', [DocumentController::class, 'index'])
     ->middleware(['auth', 'verified'])
-    ->name('documents.index');
+    ->name('documents');
 
 Route::get('documents/{document}', [DocumentController::class, 'show'])
     ->middleware(['auth', 'verified'])
