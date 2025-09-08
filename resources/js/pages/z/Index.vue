@@ -10,8 +10,6 @@ import  IconField  from 'primevue/iconfield';
 import  InputText  from 'primevue/inputtext';
 import  InputIcon  from 'primevue/inputicon';
 import Button from 'primevue/button'
-import AccountDetailsTable from '@/components/AccountDetailsTable.vue';
-import DocumentsIndex from '@/components/DocumentsIndex.vue';
 import Dialog from 'primevue/dialog';
 import axios  from 'axios'
 import  FileUpload from 'primevue/fileupload';
@@ -24,8 +22,8 @@ defineProps<{
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Documents',
-        href: '/documents',
+        title: 'ZDocuments',
+        href: '/z-documents',
     },
 ];
 
@@ -81,7 +79,7 @@ const redirect = (id) => {
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
             <Button
-                label="Add document"
+                label="Add Z document"
                 rounded
                 class="w-40 px-2 py-1 text-sm ml-auto"
                 @click="addDocument"
@@ -111,15 +109,19 @@ const redirect = (id) => {
                     </template>
                     <template #empty> No documents found. </template>
                     <template #loading> Loading documents data. Please wait. </template>
-                    <Column field="filename" header="Filename"></Column>
+                    <Column field="number" header="Contor"></Column>
+                    <Column field="activation_time" header="Data initializare"></Column>
+                    <Column field="initial_balance" header="Sold initial"></Column>
+                    <Column field="sales" header="Vanzari"></Column>
+                    <Column field="final_balance" header="Sold final"></Column>
+
                     <Column field="user_id" header="Actions">
                         <template #body="slotProps">
-                        <Link :href="'/documents/'+slotProps.data.id">
+                        <Link :href="'/z-documents/'+slotProps.data.id">
                             <Button
                                 label="Edit"
                             />
                         </Link>
-
                         </template>
 
                     </Column>

@@ -14,6 +14,11 @@ const mainNavItems: NavItem[] = [
         href: '/documents',
         icon: LayoutList,
     },
+    {
+        title: 'Z-Documents',
+        href: '/z-documents',
+        icon: LayoutList,
+    },
 ];
 
 const footerNavItems: NavItem[] = [

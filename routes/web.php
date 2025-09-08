@@ -1,9 +1,10 @@
 <?php
 
-use App\Http\Controllers\DocumentController;
-use App\Http\Controllers\TestController;
-use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Controllers\ZDocumentController;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\TestController;
+use App\Http\Controllers\DocumentController;
 
 
 
@@ -32,6 +33,9 @@ Route::post('documents/process', [DocumentController::class, 'process'])
     ->middleware(['auth', 'verified'])
     ->name('documents.process');
 
+//z
 
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
+Route::get('/z-documents', [ZDocumentController::class, 'index']);
+
+require __DIR__ . '/settings.php';
+require __DIR__ . '/auth.php';

@@ -14,7 +14,9 @@ return new class extends Migration
         Schema::create('documents', function (Blueprint $table) {
             $table->id();
             $table->string('user_id');
-            $table->string('file_name');
+            $table->string('filename');
+            $table->json('response'); // save textract response
+            $table->json('tables');// ocr and tables?
             $table->timestamps();
         });
     }

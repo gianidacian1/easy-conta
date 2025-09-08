@@ -70,6 +70,18 @@ const user = page.props.auth.user;
                         <InputError class="mt-2" :message="errors.email" />
                     </div>
 
+                    <div class="grid gap-2">
+                        <Label for="initial_balance">Sold initial</Label>
+                        <Input
+                            id="initial_balance"
+                            class="mt-1 block w-full"
+                            name="initial_balance"
+                            :default-value="user.initial_balance"
+                            required
+                        />
+                        <InputError class="mt-2" :message="errors.email" />
+                    </div>
+
                     <div v-if="mustVerifyEmail && !user.email_verified_at">
                         <p class="-mt-4 text-sm text-muted-foreground">
                             Your email address is unverified.

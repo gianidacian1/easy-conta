@@ -2,13 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Carbon\Carbon;
 use Inertia\Inertia;
 use App\Models\Document;
 use Illuminate\Http\Request;
 use App\Services\PdfOcrService;
 use Illuminate\Support\Facades\Storage;
-use thiagoalessio\TesseractOCR\TesseractOCR;
 
 
 class DocumentController
@@ -28,6 +26,9 @@ class DocumentController
 
     public function upload(Request $request)
     {
+        // $request->validate([
+        //     'document' => 'file',
+        // ]);
 
         $file = $request->file('document'); // single file
 
@@ -35,15 +36,20 @@ class DocumentController
             return response()->json(['message' => 'No file uploaded'], 400);
         }
 
-        // Store the file with the custom name in 'uploads' folder
-        $customName = 'Report ' . now()->format('Y-m-d') . time(). '.' . $file->getClientOriginalExtension();
-        Storage::disk('s3')->put('reports/' .$customName, $file->getContent());
+        try {
+            // Store the file with the custom name in 'uploads' folder
+            $customName = 'Report ' . now()->format('Y-m-d') . time(). '.' . $file->getClientOriginalExtension();
+            Storage::disk('s3')->put($customName, $file->getContent());
+            // $file->storeAs('/', $customName, 's3');
+            // Create DB record
+            Document::create([
+                'user_id' => auth()->user()->id,
+                'filename' => $customName
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message'=> $e->getMessage()], 400);
+        }
 
-        // Create DB record
-        Document::create([
-            'user_id' => auth()->user()->id,
-            'file_name' => $customName
-        ]);
 
         return response()->json([
             'message' => 'Upload successful',

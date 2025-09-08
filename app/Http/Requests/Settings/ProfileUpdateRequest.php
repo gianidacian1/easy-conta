@@ -25,6 +25,12 @@ class ProfileUpdateRequest extends FormRequest
                 'max:255',
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
+            'initial_balance' => [
+                'required',
+                'numeric',
+                'min:0',
+                // 'regex:/^\d{1,13}(\.\d{1,2})?$/', // up to 13 digits before decimal + 2 after
+            ]
         ];
     }
 }
