@@ -40,11 +40,14 @@ RUN composer install --optimize-autoloader --no-dev --no-scripts --no-interactio
 # Copy package files
 COPY package.json package-lock.json ./
 
-# Install Node dependencies and build
-RUN npm ci && npm run build
+# Install Node dependencies
+RUN npm ci
 
-# Copy application code
+# Copy all application code (needed for Vite to find entry points)
 COPY . .
+
+# Build frontend assets
+RUN npm run build
 
 # Set proper permissions
 RUN chown -R www-data:www-data /var/www/html \
