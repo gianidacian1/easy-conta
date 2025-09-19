@@ -17,7 +17,7 @@ import {Link} from '@inertiajs/vue3';
 import { router } from '@inertiajs/vue3'
 
 defineProps<{
-  documents: any,
+  zDocuments: any,
 }>()
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -43,14 +43,14 @@ const upload = () => {
     const formData = new FormData();
     formData.append('document', fileupload.value.files[0])
 
-    axios.post('/documents/upload', formData, {
+    axios.post('z-documents/upload', formData, {
         headers: {
             'Content-Type': 'multipart/form-data'
         }
     })
     .then(() => {
         // refresh documents list from server
-        router.reload({ only: ['documents'] })
+        router.reload({ only: ['zDocuments'] })
         visible.value = false
     })
     .catch(err => console.error(err));
@@ -74,7 +74,7 @@ const redirect = (id) => {
 </script>
 
 <template>
-    <Head title="Documents" />
+    <Head title="Z-Documents" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
@@ -87,7 +87,7 @@ const redirect = (id) => {
 
             <DataTable
                 v-model:filters="filters"
-                :value="documents"
+                :value="zDocuments"
                 tableStyle="min-width: 50rem"
                 stripedRows
                 paginator

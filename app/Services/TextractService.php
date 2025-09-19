@@ -2,8 +2,99 @@
 
 namespace App\Services;
 
+use Aws\Textract\TextractClient;
+use Aws\Exception\AwsException;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http;
+use App\Models\Document;
+use Illuminate\Support\Facades\Log;
+
 class TextractService
 {
+	private TextractClient $textractClient;
+
+	public function __construct()
+	{
+		$this->textractClient = new TextractClient([
+			'version' => 'latest',
+			'region' => config('aws.textract.region', 'us-east-1'),
+			'credentials' => [
+				'key' => config('aws.access_key_id'),
+				'secret' => config('aws.secret_access_key'),
+			],
+		]);
+	}
+
+	public function analyzeDocument(string $filePath, string $bucket = null): array
+	{
+		dd(
+			$this->textractClient
+		);
+		try {
+			if ($bucket) {
+				return $this->analyzeDocumentFromS3($filePath, $bucket);
+			} else {
+				return $this->analyzeDocumentFromLocal($filePath);
+			}
+		} catch (AwsException $e) {
+			Log::error('AWS Textract error: ' . $e->getMessage());
+			throw $e;
+		}
+	}
+
+	public function analyzeDocumentFromS3(string $filePath, string $bucket): array
+	{
+		$result = $this->textractClient->analyzeDocument([
+			'Document' => [
+				'S3Object' => [
+					'Bucket' => $bucket,
+					'Name' => $filePath,
+				],
+			],
+			'FeatureTypes' => ['TABLES', 'FORMS'],
+		]);
+
+		return $result->toArray();
+	}
+
+	public function analyzeDocumentFromLocal(string $filePath): array
+	{
+		$fileContents = Storage::get($filePath);
+
+		$result = $this->textractClient->analyzeDocument([
+			'Document' => [
+				'Bytes' => $fileContents,
+			],
+			'FeatureTypes' => ['TABLES', 'FORMS'],
+		]);
+
+		return $result->toArray();
+	}
+
+	public function startDocumentAnalysis(string $filePath, string $bucket): string
+	{
+		$result = $this->textractClient->startDocumentAnalysis([
+			'DocumentLocation' => [
+				'S3Object' => [
+					'Bucket' => $bucket,
+					'Name' => $filePath,
+				],
+			],
+			'FeatureTypes' => ['TABLES', 'FORMS'],
+		]);
+
+		return $result['JobId'];
+	}
+
+	public function getDocumentAnalysis(string $jobId): array
+	{
+		$result = $this->textractClient->getDocumentAnalysis([
+			'JobId' => $jobId,
+		]);
+
+		return $result->toArray();
+	}
+
 	public function textractInterpreter()
 	{
 		$mainHeaders = [

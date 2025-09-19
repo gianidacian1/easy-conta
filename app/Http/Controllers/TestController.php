@@ -9,6 +9,7 @@ use App\Models\Document;
 use App\Models\ZDocument;
 use Illuminate\Http\Request;
 use App\Services\PdfOcrService;
+use App\Services\ExcelImportService;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use App\Services\ZDocumentExtractionService;
@@ -19,7 +20,17 @@ class TestController
 {
     public function test()
     {
+        // $uploadedFile = Storage::disk("s3")->get("balanta.xls");
+        try {
+            $excelService = new ExcelImportService();
+            $excelService->importBalantaFromStorage('balanta.xls', 's3');
+        } catch (Throwable $e) {
+            dd(
+                $e->getMessage()
+            );
+        }
 
+        dd('asd');
 
         // $file = Storage::disk('s3')->get('response_z.json');
         // $data = json_decode($file, true);

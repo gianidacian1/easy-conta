@@ -8,7 +8,8 @@ use App\Models\ZDocument;
 use Illuminate\Http\Request;
 use App\Services\PdfOcrService;
 use Illuminate\Support\Facades\Storage;
-
+use App\Services\ZDocumentExtractionService;
+use Throwable;
 
 class ZDocumentController
 {
@@ -17,7 +18,7 @@ class ZDocumentController
     $zDocuments = ZDocument::where('user_id', auth()->user()->id)->get();
 
     return Inertia::render('z/Index', [
-      'documents' => $zDocuments
+      'zDocuments' => $zDocuments
     ]);
   }
 
@@ -28,34 +29,65 @@ class ZDocumentController
 
   public function upload(Request $request)
   {
-    // $request->validate([
-    //     'document' => 'file',
-    // ]);
+    $file = Storage::disk('s3')->get('response_z.json');
+    $data = json_decode($file, true);
+    $zData = [];
+    $lastKey = null;
+    $data2 = [];
 
-    $file = $request->file('document'); // single file
-
-    if (!$file) {
-      return response()->json(['message' => 'No file uploaded'], 400);
+    foreach ($data['Blocks'] as $block) {
+      if ($block['BlockType'] === 'LINE') {
+        $text = trim($block['Text']);
+        $data2[] = $text;
+        // If it looks like a label (no numbers, just words)
+        if (!preg_match('/\d/', $text)) {
+          $lastKey = $text;
+          if (!isset($zData[$lastKey])) {
+            $zData[$lastKey] = [];
+          }
+        } else {
+          // It's a number/value
+          if ($lastKey !== null) {
+            // if key exists and is empty, assign single value
+            if (empty($zData[$lastKey])) {
+              $zData[$lastKey] = is_numeric($text) ? (float) $text : $text;
+            } else {
+              // if key already has value, convert to array
+              if (!is_array($zData[$lastKey])) {
+                $zData[$lastKey] = [$zData[$lastKey]];
+              }
+              $zData[$lastKey][] = is_numeric($text) ? (float) $text : $text;
+            }
+          }
+        }
+      }
     }
 
+    $service = new ZDocumentExtractionService();
+    $data = $service->handle();
+
+    $user = auth()->user();
     try {
-      // Store the file with the custom name in 'uploads' folder
-      $customName = 'Report ' . now()->format('Y-m-d') . time() . '.' . $file->getClientOriginalExtension();
-      Storage::disk('s3')->put($customName, $file->getContent());
-      // $file->storeAs('/', $customName, 's3');
-      // Create DB record
-      Document::create([
-        'user_id' => auth()->user()->id,
-        'filename' => $customName
+      $finalBalance = $user->initial_balance + $data['sales'];
+      $document = ZDocument::create([
+        'user_id' => $user->id,
+        'number' => $data['number'],
+        'initial_balance' => $user->initial_balance,
+        'activation_time' => now(),
+        'sales' => $data['sales'],
+        'final_balance' => $finalBalance,
       ]);
-    } catch (\Exception $e) {
-      return response()->json(['message' => $e->getMessage()], 400);
+
+      $user->initial_balance = $finalBalance;
+      $user->save();
+    } catch (Throwable $th) {
+      dd($th->getMessage());
     }
 
 
     return response()->json([
       'message' => 'Upload successful',
-      'file' => $customName,
+      'file' => $zData,
     ]);
   }
 

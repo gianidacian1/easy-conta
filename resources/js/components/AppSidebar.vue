@@ -9,14 +9,19 @@ import { BookOpen, Folder, LayoutGrid, LayoutList } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
 const mainNavItems: NavItem[] = [
-     {
-        title: 'Documents',
-        href: '/documents',
+    {
+        title: 'Balante',
+        href: '/balante',
         icon: LayoutList,
     },
     {
         title: 'Z-Documents',
         href: '/z-documents',
+        icon: LayoutList,
+    },
+    {
+        title: 'Documents',
+        href: '/documents',
         icon: LayoutList,
     },
 ];
