@@ -68,6 +68,9 @@ RUN npm ci
 # Copy all application code
 COPY . .
 
+# Debug: List files to verify .env.example exists
+RUN ls -la | grep env
+
 # Copy .env.example to .env if .env doesn't exist
 RUN if [ ! -f .env ]; then cp .env.example .env; fi
 
