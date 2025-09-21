@@ -89,9 +89,9 @@ RUN if [ ! -f .env ]; then cp .env.example .env; fi
 RUN php artisan key:generate --no-interaction
 
 # Clear and cache Laravel configuration
-RUN php artisan config:cache \
-    && php artisan route:cache \
-    && php artisan view:cache
+#RUN php artisan config:cache \
+#    && php artisan route:cache \
+#    && php artisan view:cache
 
 # Build frontend assets
 RUN npm run build
