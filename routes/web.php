@@ -17,7 +17,6 @@ Route::get('/', function () {
 })->name('home');
 
 //balante
-// documents
 Route::get('balances', [BalanceController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('balances');
