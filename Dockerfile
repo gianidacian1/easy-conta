@@ -80,7 +80,7 @@ RUN npm ci
 COPY . .
 
 # Debug: List files to verify .env.example exists
-RUN ls -la | grep env
+RUN ls -la && ls -la | grep env || echo "No env files found"
 
 # Copy .env.example to .env if .env doesn't exist
 RUN if [ ! -f .env ]; then cp .env.example .env; fi
