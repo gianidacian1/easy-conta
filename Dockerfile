@@ -42,7 +42,7 @@ ENV SERVER_NAME=localhost
 # Configure Apache document root and fix undefined variables
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \
     && sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf \
-    && sed -ri -e 's/\${APACHE_DEVICE}//g' /etc/apache2/sites-available/*.conf /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+    && sed -ri -e 's/\$\{APACHE_DEVICE\}//g' /etc/apache2/sites-available/*.conf /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
 # Create proper Apache config for Laravel
 RUN echo '<VirtualHost *:80>\n\
