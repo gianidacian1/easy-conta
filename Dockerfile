@@ -83,7 +83,7 @@ COPY . .
 RUN ls -la && ls -la | grep env || echo "No env files found"
 
 # Copy .env.example to .env if .env doesn't exist
-#RUN if [ ! -f .env ]; then cp .env.example .env; fi
+RUN if [ ! -f .env ]; then cp .env.example .env; fi
 
 # Generate Laravel application key
 RUN php artisan key:generate --no-interaction
