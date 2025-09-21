@@ -2,14 +2,14 @@
 
 namespace App\Imports;
 
-use App\Models\Balanta;
+use App\Models\Balance;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\Importable;
 use Illuminate\Support\Facades\Log;
 
-class BalantaImport implements ToModel, WithChunkReading
+class BalanceImport implements ToModel, WithChunkReading
 {
     use Importable;
 
@@ -29,7 +29,7 @@ class BalantaImport implements ToModel, WithChunkReading
 
         Log::info('Importing row with cont:', ['cont' => $row[0]]);
         $userId = auth()->user()->id;
-        return Balanta::updateOrCreate(
+        return Balance::updateOrCreate(
             ['cont' => $row[0]],
             [
                 'user_id' => $userId,

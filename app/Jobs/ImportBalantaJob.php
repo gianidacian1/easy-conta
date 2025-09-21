@@ -10,7 +10,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
-class ImportBalantaJob implements ShouldQueue
+class ImportBalanceJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -27,7 +27,7 @@ class ImportBalantaJob implements ShouldQueue
     {
         try {
             $excelService = new ExcelImportService();
-            $excelService->importBalantaFromStorage($this->filePath, $this->disk);
+            $excelService->importBalanceFromStorage($this->filePath, $this->disk);
 
             Log::info("Balanta import job completed successfully", [
                 'file_path' => $this->filePath,

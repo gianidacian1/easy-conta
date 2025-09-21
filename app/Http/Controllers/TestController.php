@@ -20,17 +20,44 @@ class TestController
 {
     public function test()
     {
-        // $uploadedFile = Storage::disk("s3")->get("balanta.xls");
-        try {
-            $excelService = new ExcelImportService();
-            $excelService->importBalantaFromStorage('balanta.xls', 'public');
-        } catch (Throwable $e) {
-            dd(
-                $e->getMessage()
-            );
+        $file = Storage::disk('local')->get('response_z.json');
+        dd($file);
+        $data = json_decode($file, true);
+
+        $zData = [];
+        $lastKey = null;
+        $data2 = [];
+
+        foreach ($data['Blocks'] as $block) {
+            if ($block['BlockType'] === 'LINE') {
+                $text = trim($block['Text']);
+                $data2[] = $text;
+                // If it looks like a label (no numbers, just words)
+                if (!preg_match('/\d/', $text)) {
+                    $lastKey = $text;
+                    if (!isset($zData[$lastKey])) {
+                        $zData[$lastKey] = [];
+                    }
+                } else {
+                    // It's a number/value
+                    if ($lastKey !== null) {
+                        // if key exists and is empty, assign single value
+                        if (empty($zData[$lastKey])) {
+                            $zData[$lastKey] = is_numeric($text) ? (float) $text : $text;
+                        } else {
+                            // if key already has value, convert to array
+                            if (!is_array($zData[$lastKey])) {
+                                $zData[$lastKey] = [$zData[$lastKey]];
+                            }
+                            $zData[$lastKey][] = is_numeric($text) ? (float) $text : $text;
+                        }
+                    }
+                }
+            }
         }
 
-        dd('asd');
+        $service = new ZDocumentExtractionService();
+        $data = $service->handle();
 
         // $file = Storage::disk('s3')->get('response_z.json');
         // $data = json_decode($file, true);

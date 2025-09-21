@@ -43,7 +43,7 @@ class BalanceController extends Controller
     public function upload(Request $request)
     {
         $request->validate([
-            'balance' => 'file',
+            'balance' => 'required|file|mimes:xls,xlsx',
         ]);
 
         $file = $request->file('balance'); // single file
@@ -59,7 +59,7 @@ class BalanceController extends Controller
 
             // Create DB record
             $excelService = new ExcelImportService();
-            $excelService->importBalantaFromUploadedFile($file);
+            $excelService->importBalanceFromUploadedFile($file);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
