@@ -39,9 +39,10 @@ ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 ENV APACHE_DEVICE=""
 ENV SERVER_NAME=localhost
 
-# Configure Apache document root
+# Configure Apache document root and fix undefined variables
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \
-    && sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+    && sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf \
+    && sed -ri -e 's/\${APACHE_DEVICE}//g' /etc/apache2/sites-available/*.conf /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
 # Create proper Apache config for Laravel
 RUN echo '<VirtualHost *:80>\n\
@@ -55,8 +56,10 @@ RUN echo '<VirtualHost *:80>\n\
     CustomLog ${APACHE_LOG_DIR}/access.log combined\n\
 </VirtualHost>' > /etc/apache2/sites-available/000-default.conf
 
-# Set global ServerName to suppress warnings
-RUN echo "ServerName \${SERVER_NAME}" >> /etc/apache2/apache2.conf
+# Set global ServerName to suppress warnings and fix undefined variables
+RUN echo "ServerName \${SERVER_NAME}" >> /etc/apache2/apache2.conf \
+    && find /etc/apache2 -name "*.conf" -exec sed -i 's/\${APACHE_DEVICE}//g' {} \; \
+    && find /etc/apache2 -name "*.conf" -exec sed -i '/^[[:space:]]*$/d' {} \;
 
 # Set working directory
 WORKDIR /var/www/html
