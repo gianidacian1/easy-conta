@@ -3,11 +3,11 @@
         v-model:filters="filters"
         :value="documents"
         tableStyle="min-width: 50rem"
-        stripedRows 
+        stripedRows
         paginator
         :rows="5" :rowsPerPageOptions="[1, 5, 20]"
         :showGridlines="true"
-        filterDisplay="row" 
+        filterDisplay="row"
         :loading="loading"
         :globalFilterFields="['denumirea_contului']"
         >

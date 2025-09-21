@@ -27,12 +27,12 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 const props = defineProps({
-      balante: Object, // Paginated object from Laravel
+      balances: Object, // Paginated object from Laravel
       filters: Object
   })
 
   // Use props directly
-console.log(props.balante)
+console.log(props.balances)
 
 const loading = ref(false);
 const visible = ref(false)
@@ -51,13 +51,13 @@ const goToPage = (url: string) => {
 const fileupload = ref()
 
 const upload = () => {
-    console.log('upload')
+    console.log('balances')
     if (!fileupload.value.files.length) return;
     console.log('upload file exists')
     const formData = new FormData();
-    formData.append('balanta', fileupload.value.files[0])
+    formData.append('balance', fileupload.value.files[0])
 
-    axios.post('/balante/upload', formData, {
+    axios.post('/balances/upload', formData, {
         headers: {
             'Content-Type': 'multipart/form-data'
         }
@@ -97,7 +97,7 @@ const upload = () => {
                 @click="addDocument"
             />
             <DataTable
-                :value="balante.data"
+                :value="balances.data"
                 :paginator="false"
                 :loading="loading"
                 stripedRows
@@ -121,14 +121,14 @@ const upload = () => {
             </DataTable>
 
             <!-- Custom pagination -->
-            <div class="flex justify-between items-center mt-4" v-if="balante.links">
+            <div class="flex justify-between items-center mt-4" v-if="balances.links">
                 <span class="text-sm text-gray-600">
-                    Showing {{ balante.from }}-{{ balante.to }} of {{ balante.total }}
+                    Showing {{ balances.from }}-{{ balances.to }} of {{ balances.total }}
                 </span>
 
                 <div class="flex space-x-1">
                     <Button
-                        v-for="link in balante.links"
+                        v-for="link in balances.links"
                         :key="link.label"
                         @click="goToPage(link.url)"
                         :disabled="!link.url"

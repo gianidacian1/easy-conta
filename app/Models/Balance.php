@@ -5,12 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Balanta extends Model
+class Balance extends Model
 {
 	/** @use HasFactory<\Database\Factories\UserFactory> */
 	use HasFactory;
 
-	protected $table = 'balante';
+	protected $table = 'balances';
 
 	/**
 	 * The attributes that are mass assignable.

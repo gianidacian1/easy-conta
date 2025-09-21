@@ -1,5 +1,0 @@
-[phases.setup]
-nixPkgs = ['php83', 'php83Extensions.gd', 'php83Extensions.zip', 'php83Extensions.dom', 'php83Extensions.curl', 'php83Extensions.pdo', 'php83Extensions.pdo_mysql', 'nodejs_20']
-
-[variables]
-PHP_VERSION = "8.3"

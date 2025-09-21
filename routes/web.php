@@ -3,7 +3,7 @@
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TestController;
-use App\Http\Controllers\BalantaController;
+use App\Http\Controllers\BalanceController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\ZDocumentController;
 
@@ -18,12 +18,12 @@ Route::get('/', function () {
 
 //balante
 // documents
-Route::get('balante', [BalantaController::class, 'index'])
+Route::get('balances', [BalanceController::class, 'index'])
     ->middleware(['auth', 'verified'])
-    ->name('balante');
-Route::post('balante/upload', [BalantaController::class, 'upload'])
+    ->name('balances');
+Route::post('balances/upload', [BalanceController::class, 'upload'])
     ->middleware(['auth', 'verified'])
-    ->name('balante.upload');
+    ->name('balances.upload');
 
 
 // documents

@@ -10,8 +10,8 @@ import AppLogo from './AppLogo.vue';
 
 const mainNavItems: NavItem[] = [
     {
-        title: 'Balante',
-        href: '/balante',
+        title: 'Balance',
+        href: '/balances',
         icon: LayoutList,
     },
     {

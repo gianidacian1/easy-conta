@@ -14,10 +14,13 @@ RUN apt-get update && apt-get install -y \
     nodejs \
     npm \
     libmagickwand-dev \
+    libfreetype6-dev \
+    libjpeg62-turbo-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install PHP extensions
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
+# Configure and install PHP extensions
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 
 # Install ImageMagick extension
 RUN pecl install imagick && docker-php-ext-enable imagick
@@ -43,24 +46,39 @@ COPY package.json package-lock.json ./
 # Install Node dependencies
 RUN npm ci
 
-# Copy all application code (needed for Vite to find entry points)
+# Copy all application code
 COPY . .
 
 # Build frontend assets
 RUN npm run build
 
+# Run Laravel post-install scripts
+RUN composer run-script post-autoload-dump
+
 # Set proper permissions
 RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html/storage \
-    && chmod -R 755 /var/www/html/bootstrap/cache
-
-# Generate optimized autoloader
-RUN composer dump-autoload --optimize
+    && chmod -R 775 /var/www/html/storage \
+    && chmod -R 775 /var/www/html/bootstrap/cache
 
 # Configure Apache document root
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
-RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+RUN sed -ri -e 's!/var/www/!${APACHE_DEVICE}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+
+# Create Apache virtual host for Laravel
+RUN echo '<VirtualHost *:80>\n\
+    DocumentRoot ${APACHE_DOCUMENT_ROOT}\n\
+    <Directory ${APACHE_DOCUMENT_ROOT}>\n\
+        AllowOverride All\n\
+        Require all granted\n\
+    </Directory>\n\
+    ErrorLog ${APACHE_LOG_DIR}/error.log\n\
+    CustomLog ${APACHE_LOG_DIR}/access.log combined\n\
+</VirtualHost>' > /etc/apache2/sites-available/laravel.conf
+
+RUN a2dissite 000-default && a2ensite laravel
 
 # Expose port 80
 EXPOSE 80
+
+CMD ["apache2-foreground"]
