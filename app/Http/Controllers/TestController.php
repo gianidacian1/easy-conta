@@ -20,8 +20,8 @@ class TestController
 {
     public function test()
     {
-        $file = Storage::disk('local')->get('response_z.json');
-        dd($file);
+        $file = Storage::disk('public')->get('response_z.json');
+
         $data = json_decode($file, true);
 
         $zData = [];
@@ -57,8 +57,8 @@ class TestController
         }
 
         $service = new ZDocumentExtractionService();
-        $data = $service->handle();
-
+        $finalData = $service->handle();
+        dd($finalData);
         // $file = Storage::disk('s3')->get('response_z.json');
         // $data = json_decode($file, true);
         // $zData = [];

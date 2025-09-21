@@ -1,27 +1,44 @@
-/.phpunit.cache
-/bootstrap/ssr
+# Laravel & Framework
+/vendor
 /node_modules
 /public/build
 /public/hot
-/public/storage
-/storage/*.key
+!/app/public/storage
+/bootstrap/ssr
+
+# Storage (keep only public symlink, ignore keys/uploads)
+storage/*.key
 /storage/pail
+
+# PHPUnit / Testing
+.phpunit.cache
+.phpunit.result.cache
+
+# IDE / Editor configs
+/.idea
+/.vscode
+/.fleet
+/.nova
+/.zed
+.phpactor.json
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Project-specific
 /resources/js/actions
 /resources/js/routes
 /resources/js/wayfinder
-/vendor
-.env
-.env.backup
-.env.production
-.phpactor.json
-.phpunit.result.cache
-Homestead.json
-Homestead.yaml
+
+# Logs & Debug
 npm-debug.log
 yarn-error.log
+
+# Homestead
+Homestead.json
+Homestead.yaml
+
+# Auth
 /auth.json
-/.fleet
-/.idea
-/.nova
-/.vscode
-/.zed
