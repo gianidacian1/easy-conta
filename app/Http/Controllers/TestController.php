@@ -23,7 +23,7 @@ class TestController
         // $uploadedFile = Storage::disk("s3")->get("balanta.xls");
         try {
             $excelService = new ExcelImportService();
-            $excelService->importBalantaFromStorage('balanta.xls', 's3');
+            $excelService->importBalantaFromStorage('balanta.xls', 'public');
         } catch (Throwable $e) {
             dd(
                 $e->getMessage()

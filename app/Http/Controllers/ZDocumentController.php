@@ -29,7 +29,7 @@ class ZDocumentController
 
   public function upload(Request $request)
   {
-    $file = Storage::disk('s3')->get('response_z.json');
+    $file = Storage::disk('public')->get('response_z.json');
     $data = json_decode($file, true);
     $zData = [];
     $lastKey = null;

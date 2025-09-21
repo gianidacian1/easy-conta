@@ -161,7 +161,7 @@ class TextractService
 		$filePath = 'reports/test_ocr.pdf';
 
 		// Get file contents from S3
-		$fileContents = Storage::disk('s3')->get($filePath);
+		$fileContents = Storage::disk('public')->get($filePath);
 
 		// Create a temporary stream
 		$temp = tmpfile();

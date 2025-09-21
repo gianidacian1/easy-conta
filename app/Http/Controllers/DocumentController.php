@@ -39,8 +39,8 @@ class DocumentController
         try {
             // Store the file with the custom name in 'uploads' folder
             $customName = 'Report ' . now()->format('Y-m-d') . time(). '.' . $file->getClientOriginalExtension();
-            Storage::disk('s3')->put($customName, $file->getContent());
-            // $file->storeAs('/', $customName, 's3');
+            Storage::disk('public')->put($customName, $file->getContent());
+
             // Create DB record
             Document::create([
                 'user_id' => auth()->user()->id,

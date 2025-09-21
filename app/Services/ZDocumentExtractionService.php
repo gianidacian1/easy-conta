@@ -14,7 +14,7 @@ class ZDocumentExtractionService
 
     public function handle(string $filename = 'response_z.json')
     {
-        $file = Storage::disk('s3')->get($filename);
+        $file = Storage::disk('public')->get($filename);
         $data = json_decode($file, true);
         $zData = [];
 

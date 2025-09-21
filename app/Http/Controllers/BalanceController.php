@@ -55,8 +55,8 @@ class BalanceController extends Controller
         try {
             // Store the file with the custom name in 'uploads' folder
             $customName = 'Balante_de_verificare_ ' . now()->format('Y-m-d') . time() . '.' . $file->getClientOriginalExtension();
-            Storage::disk('s3')->put($customName, $file->getContent());
-            // $file->storeAs('/', $customName, 's3');
+            Storage::disk('public')->put($customName, $file->getContent());
+
             // Create DB record
             $excelService = new ExcelImportService();
             $excelService->importBalantaFromUploadedFile($file);
