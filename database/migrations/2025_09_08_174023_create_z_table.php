@@ -13,11 +13,13 @@ return new class extends Migration {
         Schema::create('z_documents', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users', 'id');
+            $table->string('name'); //name
             $table->string('number'); //contor
             $table->date('activation_time'); //ora activare
             $table->string('initial_balance'); // sold initial
             $table->string('sales');
             $table->string('final_balance');
+            $table->enum('type', ['sale', 'payment'])->default('sale');
             $table->timestamps();
             $table->softDeletes();
         });

@@ -6,25 +6,29 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, Sid
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
 import { BookOpen, Folder, LayoutGrid, LayoutList } from 'lucide-vue-next';
+import { useI18n } from 'vue-i18n';
+import { computed } from 'vue';
 import AppLogo from './AppLogo.vue';
 
-const mainNavItems: NavItem[] = [
+const { t } = useI18n();
+
+const mainNavItems = computed(() => [
     {
-        title: 'Balance',
+        title: t('nav.balances'),
         href: '/balances',
         icon: LayoutList,
     },
     {
-        title: 'Z-Documents',
+        title: t('nav.zDocuments'),
         href: '/z-documents',
         icon: LayoutList,
     },
     {
-        title: 'Documents',
+        title: t('nav.documents'),
         href: '/documents',
         icon: LayoutList,
     },
-];
+]);
 
 const footerNavItems: NavItem[] = [
     // {

@@ -6,12 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Balance extends Model
+class Dashboard extends Model
 {
 	/** @use HasFactory<\Database\Factories\UserFactory> */
 	use HasFactory, SoftDeletes;
 
-	protected $table = 'balances';
+	protected $table = 'dashboards';
 
 	/**
 	 * The attributes that are mass assignable.
@@ -20,17 +20,25 @@ class Balance extends Model
 	 */
 	protected $fillable = [
 		'user_id',
-		'cont',
-		'denumirea_contului',
-		'solduri_initiale_an',
-		'rulaje_perioada',
-		'sume_totale',
-		'solduri_finale'
+		'title',
+		'description',
+		'widget_type',
+		'widget_data',
+		'position',
+		'size',
+		'is_active'
 	];
+
 	protected $casts = [
-		'solduri_initiale_an' => 'array',
-		'rulaje_perioada' => 'array',
-		'sume_totale' => 'array',
-		'solduri_finale' => 'array'
+		'widget_data' => 'array',
+		'is_active' => 'boolean'
 	];
+
+	/**
+	 * Get the user that owns the dashboard widget.
+	 */
+	public function user()
+	{
+		return $this->belongsTo(User::class);
+	}
 }

@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Services\PdfOcrService;
 use App\Services\ExcelImportService;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\UploadBalanceRequest;
 
 
 class BalanceController extends Controller
@@ -40,22 +41,20 @@ class BalanceController extends Controller
         return Inertia::render('balances/Show');
     }
 
-    public function upload(Request $request)
+    public function upload(UploadBalanceRequest $request)
     {
-        $request->validate([
-            'balance' => 'required|file|mimes:xls,xlsx',
-        ]);
 
         $file = $request->file('balance'); // single file
 
         if (!$file) {
             return response()->json(['message' => 'No file uploaded'], 400);
         }
-
+        // Todo create action
         try {
             // Store the file with the custom name in 'uploads' folder
             $customName = 'Balante_de_verificare_ ' . now()->format('Y-m-d') . time() . '.' . $file->getClientOriginalExtension();
-            Storage::disk('public')->put($customName, $file->getContent());
+            // not sure if we really need to save the file at the moment
+            // Storage::disk(config('app.default_filesystem'))->put($customName, $file->getContent());
 
             // Create DB record
             $excelService = new ExcelImportService();
@@ -91,4 +90,16 @@ class BalanceController extends Controller
             ], 500);
         }
     }
+
+    public function bulkDelete(Request $request)
+    {
+        $ids = $request->input('ids');
+
+        Balance::whereIn('id', $ids)
+            ->where('user_id', auth()->user()->id)
+            ->delete();
+
+        return redirect()->back()->with('success', 'Items deleted successfully');
+    }
+
 }

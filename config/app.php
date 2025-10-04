@@ -123,4 +123,5 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'default_filesystem' => env('DEFAULT_FILESYSTEM', 'local')
 ];

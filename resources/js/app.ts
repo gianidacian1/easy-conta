@@ -8,8 +8,25 @@ import { initializeTheme } from './composables/useAppearance';
 import PrimeVue from 'primevue/config';
 import Aura from '@primeuix/themes/aura'
 import ToastService from 'primevue/toastservice';
+import ConfirmationService from 'primevue/confirmationservice';
+import { createI18n } from 'vue-i18n';
+import en from './locales/en.json';
+import ro from './locales/ro.json';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+
+// Get saved language from localStorage or default to Romanian
+const savedLocale = localStorage.getItem('locale') || 'ro';
+
+const i18n = createI18n({
+    legacy: false,
+    locale: savedLocale,
+    fallbackLocale: 'ro',
+    messages: {
+        en,
+        ro,
+    },
+});
 
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
@@ -17,6 +34,7 @@ createInertiaApp({
     setup({ el, App, props, plugin }) {
         createApp({ render: () => h(App, props) })
             .use(plugin)
+            .use(i18n)
             .use(PrimeVue, {
                 theme: {
                     preset: Aura,
@@ -28,6 +46,7 @@ createInertiaApp({
                 }
             })
             .use(ToastService)
+            .use(ConfirmationService)
             .mount(el);
     },
     progress: {

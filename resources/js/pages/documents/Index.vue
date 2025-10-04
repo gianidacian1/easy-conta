@@ -4,7 +4,8 @@ import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { FilterMatchMode } from '@primevue/core/api';
 import  IconField  from 'primevue/iconfield';
 import  InputText  from 'primevue/inputtext';
@@ -22,12 +23,14 @@ defineProps<{
   documents: any,
 }>()
 
-const breadcrumbs: BreadcrumbItem[] = [
+const { t } = useI18n();
+
+const breadcrumbs = computed(() => [
     {
-        title: 'Documents',
+        title: t('documents.title'),
         href: '/documents',
     },
-];
+]);
 
 const loading = ref(false);
 const visible = ref(false)
@@ -76,12 +79,12 @@ const redirect = (id) => {
 </script>
 
 <template>
-    <Head title="Documents" />
+    <Head :title="t('documents.title')" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
             <Button
-                label="Add document"
+                :label="t('documents.addDocument')"
                 rounded
                 class="w-40 px-2 py-1 text-sm ml-auto"
                 @click="addDocument"
@@ -105,18 +108,18 @@ const redirect = (id) => {
                                 <InputIcon>
                                     <i class="pi pi-search" />
                                 </InputIcon>
-                                <InputText v-model="filters['global'].value" placeholder="Keyword Search" />
+                                <InputText v-model="filters['global'].value" :placeholder="t('documents.keywordSearch')" />
                             </IconField>
                         </div>
                     </template>
-                    <template #empty> No documents found. </template>
-                    <template #loading> Loading documents data. Please wait. </template>
-                    <Column field="filename" header="Filename"></Column>
-                    <Column field="user_id" header="Actions">
+                    <template #empty>{{ t('documents.noDocumentsFound') }}</template>
+                    <template #loading>{{ t('documents.loadingDocuments') }}</template>
+                    <Column field="filename" :header="t('documents.filename')"></Column>
+                    <Column field="user_id" :header="t('common.actions')">
                         <template #body="slotProps">
                         <Link :href="'/documents/'+slotProps.data.id">
                             <Button
-                                label="Edit"
+                                :label="t('common.edit')"
                             />
                         </Link>
 
@@ -129,10 +132,10 @@ const redirect = (id) => {
         <Dialog
             v-model:visible="visible"
             modal
-            header="Upload"
+            :header="t('common.upload')"
             :style="{ width: '25rem' }"
         >
-            <span class="text-surface-500 dark:text-surface-400 block mb-8">Upload document</span>
+            <span class="text-surface-500 dark:text-surface-400 block mb-8">{{ t('documents.uploadDocument') }}</span>
             <div class="flex items-center gap-4 mb-4">
                 <FileUpload
                     ref="fileupload"
@@ -145,8 +148,8 @@ const redirect = (id) => {
             </div>
 
             <div class="flex justify-end gap-2">
-                <Button type="button" label="Cancel" severity="secondary" @click="visible = false"></Button>
-                <Button type="button" label="Save" @click="upload"></Button>
+                <Button type="button" :label="t('common.cancel')" severity="secondary" @click="visible = false"></Button>
+                <Button type="button" :label="t('common.save')" @click="upload"></Button>
             </div>
         </Dialog>
     </AppLayout>
